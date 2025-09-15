@@ -128,25 +128,34 @@ for img_name in os.listdir(image_folder):
 
 ## Limitations:
 
-### Small object missed detection: Although SAHI improves detection, very tiny or heavily occluded shuttlecocks may still be missed.
+### Small object missed detection
+Although SAHI improves detection, very tiny or heavily occluded shuttlecocks may still be missed.
 
-### Processing time: Sliced prediction increases inference time due to overlapping slices and multiple forward passes.
+### Processing time
+Sliced prediction increases inference time due to overlapping slices and multiple forward passes.
 
-### Single-class detection: Current model is trained only for shuttlecocks; generalization to other object types is not evaluated.
+### Single-class detection
+Current model is trained only for shuttlecocks; generalization to other object types is not evaluated.
 
-### Limited dataset size: The dataset may be relatively small, potentially affecting model robustness in diverse scenarios.
+### Limited dataset size
+The dataset may be relatively small, potentially affecting model robustness in diverse scenarios.
 
-Future Improvements:
+## Future Improvements:
 
-### Data augmentation: Apply advanced augmentation techniques (e.g., mosaic, mixup, random cropping) to increase small object diversity.
+### Data augmentation 
+Apply advanced augmentation techniques (e.g., mosaic, mixup, random cropping) to increase small object diversity.
 
-### Hyperparameter tuning: Experiment with different confidence thresholds, slice sizes, and overlap ratios to balance accuracy and speed.
+### Hyperparameter tuning
+Experiment with different confidence thresholds, slice sizes, and overlap ratios to balance accuracy and speed.
 
-### Multi-class expansion: Extend the model to detect multiple small object types simultaneously.
+### Multi-class expansion
+Extend the model to detect multiple small object types simultaneously.
 
-### Model optimization: Consider lighter-weight architectures or GPU acceleration to reduce inference time.
+### Model optimization
+Consider lighter-weight architectures or GPU acceleration to reduce inference time.
 
-### Ensemble methods: Combine YOLOv11 + SAHI predictions with other detection models to further improve recall on challenging small objects.
+### Ensemble methods
+Combine YOLOv11 + SAHI predictions with other detection models to further improve recall on challenging small objects.
 
 
 
