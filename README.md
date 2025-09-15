@@ -1,78 +1,95 @@
-#羽毛球小物体检测实验：YOLOv8 与 YOLOv8+SAHI 对比
-##项目简介
+Shuttlecock Small Object Detection Experiment: YOLOv11 vs YOLOv11+SAHI
+Project Overview
 
-本项目基于 YOLOv11与SAHI实现羽毛球小物体检测，并进行了YOLOv11原生检测 vs YOLOv11 + SAHI 切片推理 的对比实验。
+This project implements small object detection for shuttlecocks using YOLOv11 and SAHI. We conducted a comparative study between YOLOv11 native detection and YOLOv11 + SAHI sliced prediction.
 
-##主要研究内容：
+Main Objectives
 
-自定义 YOLOv8 模型训练，识别羽毛球
+Train a custom YOLOv11 model to detect shuttlecocks
 
-SAHI 切片推理提高小物体检测精度
+Improve small object detection accuracy using SAHI sliced prediction
 
-对比两种方法在小物体检测上的性能差异
+Compare the performance of both methods on small object detection
 
-##数据集
+Dataset
 
-数据集包括训练集和测试集
+The dataset includes training and testing sets
 
-class_id 从 0 开始，只有“羽毛球”这一类
+Only one class exists: shuttlecock, with class_id = 0
 
-YOLOv8 模型训练
+YOLO format is used for labels:
+
+<class_id> <x_center> <y_center> <width> <height>
+
+Coordinates are normalized to [0,1]
+
+YOLOv11 Model Training
 ```python
 from ultralytics import YOLO
 
-# Create a new YOLO model from scratch
+# Create a new YOLOv11 model from scratch
 model = YOLO("myyolo11n.yaml")
 
-# Load a pretrained YOLO model (recommended for training)
-model = YOLO("E:/VisualProject/ultralytics-main/yolo11n .pt")
+# Load a pretrained YOLOv11 model (recommended)
+model = YOLO("E:/VisualProject/ultralytics-main/yolo11n.pt")
 
-# Train the model using the 'coco8.yaml' dataset for 3 epochs
-results = model.train(data="E:/VisualProject/ultralytics-main/ultralytics/cfg/datasets/mycoco128.yaml", epochs=30)
-
-# Evaluate the model's performance on the validation set
-results = model.val()
-
-# Perform object detection on an image using the model
-#results = model("https://ultralytics.com/images/bus.jpg")
-
-# Export the model to ONNX format
-#success = model.export(format="onnx")
-
-实验 1：YOLOv8 原生检测
-from ultralytics import YOLO
-
-model = YOLO("runs/detect/train/weights/best.pt")
-
-results = model.predict(
-    source="dataset/images/test",
-    imgsz=640,
-    conf=0.3,
-    save=True,
-    save_txt=True,
+# Train the model using the custom dataset for 30 epochs
+results = model.train(
+    data="E:/VisualProject/ultralytics-main/ultralytics/cfg/datasets/mycoco128.yaml",
+    epochs=30
 )
 
+# Evaluate the model on the validation set
+results = model.val()
 
-原生 YOLOv8 对小物体可能存在漏检
+# (Optional) Perform detection on a single image
+# results = model("https://ultralytics.com/images/bus.jpg")
 
-实验 2：YOLOv8 + SAHI 切片推理
+# (Optional) Export the model to ONNX format
+# success = model.export(format="onnx")
+```
+
+Experiment 1: YOLOv11 Native Detection
+```python
+from ultralytics import YOLO
+
+model = YOLO("E:/VisualProject/ultralytics-main/runs/detect/train2/weights/best.pt")
+
+# Predict on all images in the test folder
+results = model.predict(
+    source="E:/VisualProject/ultralytics-main/data/mycoco/test_images",
+    show=True,
+    save=True
+)
+```
+
+### Note: Native YOLOv11 may miss small objects such as shuttlecocks.
+
+Experiment 2: YOLOv11 + SAHI Sliced Prediction
+```python
 import os
 from sahi.models.ultralytics import UltralyticsDetectionModel
 from sahi.predict import get_sliced_prediction
 
+# 1. Configure YOLOv11 model
 model = UltralyticsDetectionModel(
-    model_path="runs/detect/train/weights/best.pt",
+    model_path="E:/VisualProject/ultralytics-main/runs/detect/train2/weights/best.pt",
     confidence_threshold=0.3,
-    device="cpu"
+    device="cpu"  # Change to "cuda:0" if GPU is available
 )
 
-image_folder = "dataset/images/test"
-output_folder = "sahi_results"
+# 2. Configure test image folder and output folder
+image_folder = "E:/VisualProject/ultralytics-main/data/mycoco/test_images"
+output_folder = "E:/VisualProject/ultralytics-main/sahi_results"
 os.makedirs(output_folder, exist_ok=True)
 
+# 3. Process all jpg images in the folder
 for img_name in os.listdir(image_folder):
     if img_name.lower().endswith(".jpg"):
         img_path = os.path.join(image_folder, img_name)
+        print(f"Processing: {img_name}")
+
+        # SAHI sliced prediction
         result = get_sliced_prediction(
             img_path,
             detection_model=model,
@@ -81,18 +98,56 @@ for img_name in os.listdir(image_folder):
             overlap_height_ratio=0.2,
             overlap_width_ratio=0.2
         )
-        base_name = os.path.splitext(img_name)[0]
-        result.export_visuals(export_dir=output_folder, file_name=f"{base_name}_pred.jpg")
-        result.export_json(export_dir=output_folder, file_name=f"{base_name}.json")
+
+        # 4. Save visualization results
+        result.export_visuals(
+            export_dir=output_folder,
+            file_name=f"{os.path.splitext(img_name)[0]}_pred.jpg"
+        )
+        result.export_json(
+            export_dir=output_folder,
+            file_name=f"{os.path.splitext(img_name)[0]}.json"
+        )
+```
+
+### SAHI sliced prediction significantly improves detection of small objects, especially shuttlecocks.
+
+## Comparative Results
+### YOLOV11
+![262174269932568617](https://github.com/user-attachments/assets/4e110cd6-56a2-453b-8ec0-957dea0caf0a)
+![t014cfe36fe7f82b925](https://github.com/user-attachments/assets/2b95f6e3-fae3-4550-b237-1b1dfc37ca91)
+![tqjia](https://github.com/user-attachments/assets/c9e74992-72d2-4087-847b-751d60376d5f)
+![下载](https://github.com/user-attachments/assets/7570c545-3f40-4da9-b832-e23856da056c)
+### YOLOV11+SAHI
+<img width="1023" height="682" alt="262174269932568617_pred jpg" src="https://github.com/user-attachments/assets/a3f1aa3c-2306-4d2d-b93b-155b677eb96c" />
+<img width="251" height="400" alt="t014cfe36fe7f82b925_pred jpg" src="https://github.com/user-attachments/assets/1eb6c5eb-e0dd-4b56-953f-9091e660d370" />
+<img width="700" height="400" alt="tqjia_pred jpg" src="https://github.com/user-attachments/assets/a59306c1-b2a6-4743-a779-9293733fe2ac" />
+<img width="319" height="234" alt="下载_pred jpg" src="https://github.com/user-attachments/assets/6280ed47-e07f-46c7-98fc-7a02152e81ba" />
+
+## Limitations:
+
+### Small object missed detection: Although SAHI improves detection, very tiny or heavily occluded shuttlecocks may still be missed.
+
+### Processing time: Sliced prediction increases inference time due to overlapping slices and multiple forward passes.
+
+### Single-class detection: Current model is trained only for shuttlecocks; generalization to other object types is not evaluated.
+
+### Limited dataset size: The dataset may be relatively small, potentially affecting model robustness in diverse scenarios.
+
+Future Improvements:
+
+### Data augmentation: Apply advanced augmentation techniques (e.g., mosaic, mixup, random cropping) to increase small object diversity.
+
+### Hyperparameter tuning: Experiment with different confidence thresholds, slice sizes, and overlap ratios to balance accuracy and speed.
+
+### Multi-class expansion: Extend the model to detect multiple small object types simultaneously.
+
+### Model optimization: Consider lighter-weight architectures or GPU acceleration to reduce inference time.
+
+### Ensemble methods: Combine YOLOv11 + SAHI predictions with other detection models to further improve recall on challenging small objects.
 
 
-SAHI 切片推理显著提升小物体检测率，尤其是羽毛球这种尺寸较小的目标
 
-每张图片会生成带检测框的可视化图和对应 JSON 文件
 
-对比实验效果
-方法	检测精度	小物体漏检	可视化示例
-YOLOv8 原生检测	较低	存在	保存于 runs/detect/pred
-YOLOv8 + SAHI	较高	极少	保存于 sahi_results/
 
-可在 README 中插入 原生 YOLO 与 SAHI 对比图，直观展示改进效果
+
