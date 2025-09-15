@@ -1,11 +1,9 @@
-羽毛球小物体检测实验：YOLOv8 与 YOLOv8+SAHI 对比
-项目简介
+#羽毛球小物体检测实验：YOLOv8 与 YOLOv8+SAHI 对比
+##项目简介
 
-本项目基于 YOLOv8
- 与 SAHI
- 实现羽毛球小物体检测，并进行了 YOLOv8 原生检测 vs YOLOv8 + SAHI 切片推理 的对比实验。
+本项目基于 YOLOv11与SAHI实现羽毛球小物体检测，并进行了YOLOv11原生检测 vs YOLOv11 + SAHI 切片推理 的对比实验。
 
-主要研究内容：
+##主要研究内容：
 
 自定义 YOLOv8 模型训练，识别羽毛球
 
@@ -13,56 +11,33 @@ SAHI 切片推理提高小物体检测精度
 
 对比两种方法在小物体检测上的性能差异
 
-数据集
+##数据集
 
-数据集包括训练集、验证集和测试集
-
-目录结构：
-
-dataset/
-├─ images/
-│  ├─ train/
-│  ├─ val/
-│  ├─ test/
-├─ labels/
-│  ├─ train/
-│  ├─ val/
-
-
-标签采用 YOLO 格式：
-
-<class_id> <x_center> <y_center> <width> <height>
-
-
-坐标归一化到 [0,1]
+数据集包括训练集和测试集
 
 class_id 从 0 开始，只有“羽毛球”这一类
 
-环境依赖
-pip install ultralytics sahi scikit-image imagecodecs
-
-
-Python >= 3.8
-
-GPU 可选（CUDA）
-
 YOLOv8 模型训练
+```python
 from ultralytics import YOLO
 
-# 加载预训练权重
-model = YOLO("yolov8n.pt")  
+# Create a new YOLO model from scratch
+model = YOLO("myyolo11n.yaml")
 
-# 开始训练
-model.train(
-    data="dataset/data.yaml",
-    epochs=50,
-    imgsz=640,
-    batch=16,
-    device="0"  # CPU 或 GPU
-)
+# Load a pretrained YOLO model (recommended for training)
+model = YOLO("E:/VisualProject/ultralytics-main/yolo11n .pt")
 
+# Train the model using the 'coco8.yaml' dataset for 3 epochs
+results = model.train(data="E:/VisualProject/ultralytics-main/ultralytics/cfg/datasets/mycoco128.yaml", epochs=30)
 
-输出权重文件路径：runs/detect/train/weights/best.pt
+# Evaluate the model's performance on the validation set
+results = model.val()
+
+# Perform object detection on an image using the model
+#results = model("https://ultralytics.com/images/bus.jpg")
+
+# Export the model to ONNX format
+#success = model.export(format="onnx")
 
 实验 1：YOLOv8 原生检测
 from ultralytics import YOLO
