@@ -1,9 +1,9 @@
-Shuttlecock Small Object Detection Experiment: YOLOv11 vs YOLOv11+SAHI
-Project Overview
+# Shuttlecock Small Object Detection Experiment: YOLOv11 vs YOLOv11+SAHI
+## Project Overview
 
 This project implements small object detection for shuttlecocks using YOLOv11 and SAHI. We conducted a comparative study between YOLOv11 native detection and YOLOv11 + SAHI sliced prediction.
 
-Main Objectives
+## Main Objectives
 
 Train a custom YOLOv11 model to detect shuttlecocks
 
@@ -11,17 +11,19 @@ Improve small object detection accuracy using SAHI sliced prediction
 
 Compare the performance of both methods on small object detection
 
-Dataset
+## Dataset
 
-The dataset includes training and testing sets
+The dataset includes training and testing sets.Due to limited dataset size, the training set is also used as the validation set. As a result, the evaluation during training reflects performance on the same data used for model optimization. While this setup is sufficient for demonstrating the concept and experimental workflow, it may overestimate the model’s generalization ability.
 
-Only one class exists: shuttlecock, with class_id = 0
+Only one class exists: badminton, with class_id = 0
 
 YOLO format is used for labels:
 
 <class_id> <x_center> <y_center> <width> <height>
 
 Coordinates are normalized to [0,1]
+
+Future work will include a separate validation set to more accurately assess performance on unseen data and to prevent overfitting.
 
 YOLOv11 Model Training
 ```python
