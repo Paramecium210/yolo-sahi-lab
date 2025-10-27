@@ -13,7 +13,7 @@ results = model.train(data="E:/VisualProject/ultralytics-main/ultralytics/cfg/da
 results = model.val()
 
 # Perform object detection on an image using the model
-#results = model("https://ultralytics.com/images/bus.jpg")
+# results = model("https://ultralytics.com/images/bus.jpg")
 
 # Export the model to ONNX format
-#success = model.export(format="onnx")
+# success = model.export(format="onnx")
